@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🎖️ 儿童军棋</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .chess-piece {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        .chess-piece:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .chess-piece.selected {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.1);
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .game-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .game-info p {
+            color: #666;
+            font-size: 0.95em;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            .game-header h1 {
+                font-size: 2em;
+            }
+
+            .game-board {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🎖️ 儿童军棋</h1>
+            <p>选择棋子开始游戏</p>
+        </div>
+
+        <div class="game-board" id="gameBoard">
+            <!-- 棋子将由JavaScript生成 -->
+        </div>
+
+        <div class="game-controls">
+            <button class="btn-primary" onclick="newGame()">新游戏</button>
+            <button class="btn-secondary" onclick="resetGame()">重置</button>
+        </div>
+
+        <div class="game-info">
+            <p>当前玩家: <strong id="currentPlayer">红方</strong></p>
+            <p>得分: <strong id="score">0</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // 游戏配置
+        const PIECES = ['司令', '军长', '师长', '旅长', '团长', '营长'];
+        const BOARD_SIZE = 6;
+        let selectedPiece = null;
+        let currentPlayer = '红方';
+        let score = 0;
+
+        // 初始化游戏
+        function initGame() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'chess-piece';
+                piece.textContent = PIECES[i % PIECES.length];
+                piece.dataset.index = i;
+                piece.onclick = () => selectPiece(piece);
+                board.appendChild(piece);
+            }
+        }
+
+        // 选择棋子
+        function selectPiece(piece) {
+            // 移除之前的选择
+            document.querySelectorAll('.chess-piece.selected').forEach(p => {
+                p.classList.remove('selected');
+            });
+
+            // 选择新棋子
+            piece.classList.add('selected');
+            selectedPiece = piece;
+        }
+
+        // 新游戏
+        function newGame() {
+            currentPlayer = currentPlayer === '红方' ? '蓝方' : '红方';
+            score += 10;
+            updateUI();
+            initGame();
+        }
+
+        // 重置游戏
+        function resetGame() {
+            currentPlayer = '红方';
+            score = 0;
+            selectedPiece = null;
+            updateUI();
+            initGame();
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('currentPlayer').textContent = currentPlayer;
+            document.getElementById('score').textContent = score;
+        }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('load', () => {
+            initGame();
+            updateUI();
+        });
+    </script>
+</body>
+</html>
